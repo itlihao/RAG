@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAG Demo - 对话</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js"></script>
+  <!-- Axios for API calls -->
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+  <!-- Marked for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@5.0.2/marked.min.js"></script>
+  <!-- Highlight.js for syntax highlighting -->
+  <script src="
+  https://cdn.jsdelivr.net/npm/highlightjs@9.16.2/highlight.pack.min.js
+  "></script>
+  <link href="
+  https://cdn.jsdelivr.net/npm/highlightjs@9.16.2/styles/monokai-sublime.min.css
+  " rel="stylesheet">
+
+  <link href="css/chat.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="app">
+    <!-- 侧边栏 -->
+    <div class="sidebar" :class="{ collapsed: isSidebarCollapsed }">
+      <div class="sidebar-header">
+        <div class="header-left">
+          <img src="/static/img/icon.png" class="logo" alt="Logo">
+        </div>
+        <div class="header-right">
+          <button class="toggle-btn" @click="toggleSidebar">
+            <img src="/static/img/sidebar.png" class="slide-switch-icon">
+          </button>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="toggle-btn" @click="toggleSidebar">
+          {{ isSidebarCollapsed ? '>>' : '<<' }} </button>
+            <div class="d-flex align-items-center">
+              <h5 v-if="!isSidebarCollapsed" class="m-0">历史对话</h5>
+            </div>
+            <button v-if="!isSidebarCollapsed" class="btn btn-sm btn-outline-light " title="新聊天" @click="startNewChat">
+              <i class="bi bi-plus-circle"></i>
+            </button>
+      </div>
+      <div class="sidebar-content">
+        <div v-for="session in chatHistory" :key="session.id" class="history-item" @click="loadSession(session.id)">
+          <div class="history-summary">{{ session.summary }}</div>
+          <div class="history-time">{{ formatTime(session.updated_at) }}</div>
+          <!-- Hidden button for dropdown menu -->
+          <button class="dropdown-toggle" @click.stop="toggleDropdown(session.id)">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <!-- Dropdown menu -->
+          <div v-if="session.showDropdown" class="dropdown-menu">
+            <a class="dropdown-item" href="#" @click.stop="exportSession(session.id)">
+              <i class="bi bi-box-arrow-up"></i> 导出
+            </a>
+            <a class="dropdown-item" href="#" @click.stop="deleteSession(session.id)">
+              <i class="bi bi-trash"></i> 删除
+            </a>
+            <a class="dropdown-item" href="#" @click.stop="renameSession(session.id)">
+              <i class="bi bi-pencil"></i> 重命名
+            </a>
+          </div>
+        </div>
+        <div v-if="chatHistory.length === 0" class="text-center text-muted mt-3">
+          暂无历史对话记录
+        </div>
+        <a href="documents.html" class="btn btn-outline-light mt-3 w-100">文档管理</a>
+        <div class="form-check form-switch mt-3 text-white">
+          <input class="form-check-input" type="checkbox" id="autoSpeechSwitch" v-model="autoSpeech">
+          <label class="form-check-label" for="autoSpeechSwitch">自动语音播放</label>
+        </div>
+        <div class="form-check form-switch mt-2 text-white">
+          <input class="form-check-input" type="checkbox" id="webSearchSwitch" v-model="webSearch">
+          <label class="form-check-label" for="webSearchSwitch">联网搜索</label>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 对话区域 -->
+    <div class="chat-container" ref="chatContainer">
+      <div v-for="(msg, index) in messages" :key="index" class="message"
+        :class="{ user: msg.role === 'user', bot: msg.role === 'bot' }">
+        <div class="message-content">
+          <div v-if="msg.role === 'user'" v-html="msg.content"></div>
+          <div v-else class="markdown-content" v-html="renderMarkdown(msg.content)"></div>
+          <button v-if="msg.role === 'bot' && msg.content" class="btn btn-sm btn-outline-secondary play-btn"
+            @click="toggleSpeech(msg.content, index)">
+            {{ speakingIndex === index ? '停止' : '播放' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- 输入框 -->
+    <div class="input-container">
+      <div class="input-group">
+        <input v-model="userInput" @keyup.enter="sendMessage" type="text" class="form-control"
+          placeholder="输入您的问题或点击麦克风...">
+        <button class="btn btn-outline-secondary mic-btn" :class="{ recording: isRecording }" @click="toggleRecording">
+          <i class="bi bi-mic-fill"></i>
+        </button>
+        <button v-if="webSearch" class="btn btn-outline-info" title="当前启用联网搜索">
+          <i class="bi bi-globe"></i>
+        </button>
+        <button class="btn btn-primary rounded-pill px-4" @click="sendMessage">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/chat.js">
+
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap Icons for mic icon -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</body>
+
+</html>

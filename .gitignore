@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyd
+*.pyo
+*.so
+.venv/
+.env/
+local_m3e_model/
+chunks_mapping.npy
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 数据库
+*.db
+*.sqlite
+
+# 日志和缓存
+*.log
+logs/
+.cache/
+
+# 本地模型存储
+/local_m模型/
+
+# 大文件
+*.bin
+*.h5
+*.pt
+
+# 系统生成文件
+Thumbs.db
+Desktop.ini
+
+# 依赖目录
+node_modules/
+
+# 前端构建产物
+/static/dist/
+/build/
