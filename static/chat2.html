@@ -123,6 +123,27 @@
         <button class="btn btn-primary rounded-pill px-4" @click="sendMessage">发送</button>
       </div>
     </div>
+
+    <!-- 在Vue实例容器内添加 -->
+    <div class="custom-modal" v-if="showEditModal">
+      <div class="modal-mask" @click.self="showEditModal = false"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>{{ modalTitle }}</div>
+          <button @click="showEditModal = false" class="btn-close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="input-wrapper">
+            <input v-model="editContent" class="text" placeholder="请输入修改内容..."></input>
+          </div>
+          
+        </div>
+        <div class="modal-footer">
+          <button @click="showEditModal = false" class="kimi-button cancel margin-8 ">取消</button>
+          <button @click="handleConfirm" class="kimi-button confirm">确定</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 
