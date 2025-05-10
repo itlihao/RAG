@@ -59,23 +59,23 @@
             alt="文档图标">文档管理</a>
         <a class="btn history_btn w-100"><img src="img/history.png" class="document-icon" alt="文档图标">历史会话</a>
 
-        <div v-for="session in chatHistory" :key="session.id" class="history-item margin-left-2"
-          @click="loadSession(session.id)">
+        <div v-for="session in chatHistory" :key="session.session_id" class="history-item margin-left-2"
+          @click="loadSession(session.session_id)">
           <div class="history-summary">{{ session.summary }}</div>
           <div class="history-time">{{ formatTime(session.updated_at) }}</div>
           <!-- Hidden button for dropdown menu -->
-          <button class="dropdown-toggle" @click.stop="toggleDropdown(session.id)">
+          <button class="dropdown-toggle" @click.stop="toggleDropdown(session.session_id)">
             <i class="bi bi-three-dots"></i>
           </button>
           <!-- Dropdown menu -->
           <div v-if="session.showDropdown" class="dropdown-menu">
-            <a class="dropdown-item item-text" href="#" @click.stop="renameSession(session.id)">
+            <a class="dropdown-item item-text" href="#" @click.stop="renameSession(session.session_id)">
               <i class="bi bi-pencil"></i> 编辑标题
             </a>
-            <a class="dropdown-item item-text" href="#" @click.stop="exportSession(session.id)">
+            <a class="dropdown-item item-text" href="#" @click.stop="exportSession(session.session_id)">
               <i class="bi bi-box-arrow-up"></i> 导出
             </a>
-            <a class="dropdown-item item-text delete" href="#" @click.stop="deleteSession(session.id)">
+            <a class="dropdown-item item-text delete" href="#" @click.stop="deleteSession(session.session_id)">
               <i class="bi bi-trash"></i> 删除
             </a>
           </div>

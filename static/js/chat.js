@@ -37,6 +37,7 @@ createApp({
       showEditModal: false,
       modalTitle: '修改名称',
       editContent: '',
+      editingSessionId: null,
     };
   },
   mounted() {
@@ -382,7 +383,7 @@ createApp({
     },
     toggleDropdown(sessionId) {
       this.chatHistory = this.chatHistory.map(session => {
-        if (session.id === sessionId) {
+        if (session.session_id === sessionId) {
           session.showDropdown = !session.showDropdown;
         } else {
           session.showDropdown = false;
@@ -407,7 +408,7 @@ createApp({
 
     deleteSession(sessionId) {
       if (confirm('确认是否要删除?')) {
-        this.chatHistory = this.chatHistory.filter(session => session.id !== sessionId);
+        this.chatHistory = this.chatHistory.filter(session => session.session_id !== sessionId);
         try {
           axios.delete(`/api/chat/session/${sessionId}`);
         } catch (error) {
@@ -418,20 +419,27 @@ createApp({
     },
     renameSession(sessionId) {
       // 获取当前会话的summary ,放到prompt中
-      const currentSummary = this.chatHistory.find(session => session.id === sessionId).summary;
-      this.openEditor(currentSummary);
-      // const newName = prompt('Enter new name for the session:', currentSummary);
-      // if (newName) {
-      //   const session = this.chatHistory.find(session => session.id === sessionId);
-      //   if (session) {
-      //     session.summary = newName;
-      //     axios.post(`/api/chat/session/${sessionId}/summary`, { summary: newName });
-      //   }
-      // }
+      const session = this.chatHistory.find(session => session.session_id === sessionId);
+      this.openEditor(session.summary, session.session_id);
     },
-    openEditor(content = '') {
+    openEditor(content, sessionId) {
+      this.editingSessionId = sessionId;
       this.editContent = content;
       this.showEditModal = true;
     },
+    handleConfirm() {
+      // 确认逻辑处理
+      this.showEditModal = false;
+      id = this.editingSessionId
+      newSummary = this.editContent;
+      if (newSummary && id) {
+        const session = this.chatHistory.find(session => session.session_id === id);
+        if (session) {
+          session.summary = newSummary;
+          axios.post(`/api/chat/session/${id}/summary`, { summary: newSummary });
+        }
+      }
+    },
+    
   },
 }).mount('#app');

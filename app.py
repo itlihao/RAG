@@ -355,6 +355,7 @@ def save_documents():
     with open("docs/documents_index.json", "w", encoding="utf-8") as f:
         json.dump(serializable_docs, f, ensure_ascii=False, indent=2)
 
+
 # 会话历史记录 API
 @app.get("/api/chat/history")
 async def get_chat_history():
@@ -362,12 +363,15 @@ async def get_chat_history():
         # 获取所有会话数据并按创建时间倒序排列
         history = await ChatSession.all().order_by("-create_time").limit(10)
         return {
-            "data": [{
-                "session_id": session.id,
-                "summary": session.summary,
-                "create_time": session.create_time.isoformat(),
-                "update_time": session.updat_time.isoformat()
-            } for session in history]
+            "data": [
+                {
+                    "session_id": session.id,
+                    "summary": session.summary,
+                    "create_time": session.create_time.isoformat(),
+                    "update_time": session.updat_time.isoformat(),
+                }
+                for session in history
+            ]
         }
 
     except Exception as e:
@@ -375,6 +379,36 @@ async def get_chat_history():
         raise HTTPException(status_code=500, detail=f"获取聊天历史失败: {str(e)}")
 
 
+# 修改会话的summary
+@app.post("/api/chat/session/{session_id}/summary")
+async def update_session_summary(session_id: str, request: Request):
+    try:
+        data = await request.json()
+        new_summary = data.get("summary")
+        print(f"new_summary: {new_summary}")
+
+        if not new_summary or len(new_summary) > 255:
+            raise HTTPException(
+                status_code=400, detail="摘要不能为空且长度需在255字符内"
+            )
+
+        session = await ChatSession.get_or_none(id=session_id)
+        print(f"session: {session}")
+        if not session:
+            raise HTTPException(status_code=404, detail="会话不存在")
+
+        session.summary = new_summary
+        await session.save()
+
+        return {
+            "code": 200,
+            "data": {"session_id": session.id, "new_summary": session.summary},
+        }
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"更新失败: {str(e)}")
 
 
 # 添加关闭事件
